@@ -163,14 +163,14 @@ class MGN(nn.Module):
 
 
         self.fc_id_2048_0_w = nn.Sequential(nn.Linear(args.feats, 1), nn.Sigmoid())
-        self.fc_id_2048_1_w = nn.Sequential(nn.Linear(args.feats, 1), nn.Sigmoid())
-        self.fc_id_2048_2_w = nn.Sequential(nn.Linear(args.feats, 1), nn.Sigmoid())
+        #self.fc_id_2048_1_w = nn.Sequential(nn.Linear(args.feats, 1), nn.Sigmoid())
+        #self.fc_id_2048_2_w = nn.Sequential(nn.Linear(args.feats, 1), nn.Sigmoid())
 
-        self.fc_id_256_1_0_w = nn.Sequential(nn.Linear(args.feats, 1), nn.Sigmoid())
-        self.fc_id_256_1_1_w = nn.Sequential(nn.Linear(args.feats, 1), nn.Sigmoid())
-        self.fc_id_256_2_0_w = nn.Sequential(nn.Linear(args.feats, 1), nn.Sigmoid())
-        self.fc_id_256_2_1_w = nn.Sequential(nn.Linear(args.feats, 1), nn.Sigmoid())
-        self.fc_id_256_2_2_w = nn.Sequential(nn.Linear(args.feats, 1), nn.Sigmoid())
+        #self.fc_id_256_1_0_w = nn.Sequential(nn.Linear(args.feats, 1), nn.Sigmoid())
+        #self.fc_id_256_1_1_w = nn.Sequential(nn.Linear(args.feats, 1), nn.Sigmoid())
+        #self.fc_id_256_2_0_w = nn.Sequential(nn.Linear(args.feats, 1), nn.Sigmoid())
+        #self.fc_id_256_2_1_w = nn.Sequential(nn.Linear(args.feats, 1), nn.Sigmoid())
+        #self.fc_id_256_2_2_w = nn.Sequential(nn.Linear(args.feats, 1), nn.Sigmoid())
 
 
 
@@ -250,14 +250,14 @@ class MGN(nn.Module):
         #print("fg_p1.shape:", fg_p1.shape)
         lfg_p1 = self.fc_id_2048_0_w(fg_p1) * fg_p1
         #print("lfg_p1.shape:", lfg_p1.shape)
-        lfg_p2 = self.fc_id_2048_1_w(fg_p2) * fg_p2
-        lfg_p3 = self.fc_id_2048_2_w(fg_p3) * fg_p3
+        lfg_p2 = self.fc_id_2048_0_w(fg_p2) * fg_p2
+        lfg_p3 = self.fc_id_2048_0_w(fg_p3) * fg_p3
 
-        lf0_p2 = self.fc_id_256_1_0_w(f0_p2) * f0_p2
-        lf1_p2 = self.fc_id_256_1_1_w(f1_p2) * f1_p2
-        lf0_p3 = self.fc_id_256_2_0_w(f0_p3) * f0_p3
-        lf1_p3 = self.fc_id_256_2_1_w(f1_p3) * f1_p3
-        lf2_p3 = self.fc_id_256_2_2_w(f2_p3) * f2_p3
+        lf0_p2 = self.fc_id_2048_0_w(f0_p2) * f0_p2
+        lf1_p2 = self.fc_id_2048_0_w(f1_p2) * f1_p2
+        lf0_p3 = self.fc_id_2048_0_w(f0_p3) * f0_p3
+        lf1_p3 = self.fc_id_2048_0_w(f1_p3) * f1_p3
+        lf2_p3 = self.fc_id_2048_0_w(f2_p3) * f2_p3
 
 
         predict = torch.cat([lfg_p1, lfg_p2, lfg_p3, lf0_p2, lf1_p2, lf0_p3, lf1_p3, lf2_p3], dim=1)
