@@ -6,6 +6,8 @@ import torch.nn.functional as F
 
 from torchvision.models.resnet import resnet50, Bottleneck
 
+def make_model(args):
+    return MGN(args)
 
 class ConvBlock(nn.Module):
     """Basic convolutional block:
@@ -25,7 +27,6 @@ class ConvBlock(nn.Module):
 
     def forward(self, x):
         return F.relu(self.bn(self.conv(x)))
-
 class SpatialAttn(nn.Module):
     """Spatial Attention (Sec. 3.1.I.1)"""
     def __init__(self):
@@ -91,10 +92,6 @@ class HarmAttn(nn.Module):
         y_soft_attn = self.soft_attn(x)
         return y_soft_attn
 
-
-def make_model(args):
-    return MGN(args)
-
 class MGN(nn.Module):
     def __init__(self, args):
         super(MGN, self).__init__()
@@ -111,8 +108,8 @@ class MGN(nn.Module):
             resnet.layer2,
             resnet.layer3[0],
         )
-        self.ha1 = HarmAttn(1024)
 
+        self.ha1 = HarmAttn(1024)
         res_conv4 = nn.Sequential(*resnet.layer3[1:])
 
         res_g_conv5 = resnet.layer4
@@ -164,7 +161,18 @@ class MGN(nn.Module):
         self.fc_id_256_2_2 = nn.Linear(args.feats, num_classes)
         self.fc_g = nn.Linear(args.feats * 8, num_classes)
 
-        self.fc_id_weight = nn.Sequential(nn.Linear(args.feats, 1), nn.Sigmoid())
+
+        self.fc_id_2048_0_w = nn.Sequential(nn.Linear(args.feats, 1), nn.Sigmoid())
+        self.fc_id_2048_1_w = nn.Sequential(nn.Linear(args.feats, 1), nn.Sigmoid())
+        self.fc_id_2048_2_w = nn.Sequential(nn.Linear(args.feats, 1), nn.Sigmoid())
+
+        self.fc_id_256_1_0_w = nn.Sequential(nn.Linear(args.feats, 1), nn.Sigmoid())
+        self.fc_id_256_1_1_w = nn.Sequential(nn.Linear(args.feats, 1), nn.Sigmoid())
+        self.fc_id_256_2_0_w = nn.Sequential(nn.Linear(args.feats, 1), nn.Sigmoid())
+        self.fc_id_256_2_1_w = nn.Sequential(nn.Linear(args.feats, 1), nn.Sigmoid())
+        self.fc_id_256_2_2_w = nn.Sequential(nn.Linear(args.feats, 1), nn.Sigmoid())
+
+
 
         self._init_fc(self.fc_id_2048_0)
         self._init_fc(self.fc_id_2048_1)
@@ -175,9 +183,7 @@ class MGN(nn.Module):
         self._init_fc(self.fc_id_256_2_0)
         self._init_fc(self.fc_id_256_2_1)
         self._init_fc(self.fc_id_256_2_2)
-        #self._init_fc(self.fc_id_weight)
         self._init_fc(self.fc_g)
-
 
     @staticmethod
     def _init_reduction(reduction):
@@ -200,8 +206,6 @@ class MGN(nn.Module):
         x = self.backone(x)
         x_attention = self.ha1(x)
         x = x * x_attention
-
-
         p1 = self.p1(x)
         p2 = self.p2(x)
         p3 = self.p3(x)
@@ -219,7 +223,6 @@ class MGN(nn.Module):
         z1_p3 = zp3[:, :, 1:2, :]
         z2_p3 = zp3[:, :, 2:3, :]
 
-
         fg_p1 = self.reduction_0(zg_p1).squeeze(dim=3).squeeze(dim=2)
         fg_p2 = self.reduction_1(zg_p2).squeeze(dim=3).squeeze(dim=2)
         fg_p3 = self.reduction_2(zg_p3).squeeze(dim=3).squeeze(dim=2)
@@ -229,18 +232,11 @@ class MGN(nn.Module):
         f1_p3 = self.reduction_6(z1_p3).squeeze(dim=3).squeeze(dim=2)
         f2_p3 = self.reduction_7(z2_p3).squeeze(dim=3).squeeze(dim=2)
 
-
-        fg_p1 = self.fc_id_weight(zg_p1).squeeze(dim=3).squeeze(dim=2)
-        fg_p2 = self.fc_id_weight(zg_p2).squeeze(dim=3).squeeze(dim=2)
-        fg_p3 = self.fc_id_weight(zg_p3).squeeze(dim=3).squeeze(dim=2)
-        f0_p2 = self.fc_id_weight(z0_p2).squeeze(dim=3).squeeze(dim=2)
-        f1_p2 = self.fc_id_weight(z1_p2).squeeze(dim=3).squeeze(dim=2)
-        f0_p3 = self.fc_id_weight(z0_p3).squeeze(dim=3).squeeze(dim=2)
-        f1_p3 = self.fc_id_weight(z1_p3).squeeze(dim=3).squeeze(dim=2)
-        f2_p3 = self.fc_id_weight(z2_p3).squeeze(dim=3).squeeze(dim=2)
-
-
-
+        '''
+        l_p1 = self.fc_id_2048_0(zg_p1.squeeze(dim=3).squeeze(dim=2))
+        l_p2 = self.fc_id_2048_1(zg_p2.squeeze(dim=3).squeeze(dim=2))
+        l_p3 = self.fc_id_2048_2(zg_p3.squeeze(dim=3).squeeze(dim=2))
+        '''
         l_p1 = self.fc_id_2048_0(fg_p1)
         l_p2 = self.fc_id_2048_1(fg_p2)
         l_p3 = self.fc_id_2048_2(fg_p3)
@@ -250,18 +246,21 @@ class MGN(nn.Module):
         l0_p3 = self.fc_id_256_2_0(f0_p3)
         l1_p3 = self.fc_id_256_2_1(f1_p3)
         l2_p3 = self.fc_id_256_2_2(f2_p3)
+        #print("self.fc_id_2048_0_w(fg_p1).shape:",self.fc_id_2048_0_w(fg_p1).shape)
+        #print("fg_p1.shape:", fg_p1.shape)
+        lfg_p1 = self.fc_id_2048_0_w(fg_p1) * fg_p1
+        #print("lfg_p1.shape:", lfg_p1.shape)
+        lfg_p2 = self.fc_id_2048_1_w(fg_p2) * fg_p2
+        lfg_p3 = self.fc_id_2048_2_w(fg_p3) * fg_p3
 
-        lfg_p1 = self.fc_id_weight(fg_p1) * fg_p1
-        lfg_p2 = self.fc_id_weight(fg_p2) * fg_p2
-        lfg_p3 = self.fc_id_weight(fg_p3) * fg_p3
-
-        lf0_p2 = self.fc_id_weight(f0_p2) * f0_p2
-        lf1_p2 = self.fc_id_weight(f1_p2) * f1_p2
-        lf0_p3 = self.fc_id_weight(f0_p3) * f0_p3
-        lf1_p3 = self.fc_id_weight(f1_p3) * f1_p3
-        lf2_p3 = self.fc_id_weight(f2_p3) * f2_p3
+        lf0_p2 = self.fc_id_256_1_0_w(f0_p2) * f0_p2
+        lf1_p2 = self.fc_id_256_1_1_w(f1_p2) * f1_p2
+        lf0_p3 = self.fc_id_256_2_0_w(f0_p3) * f0_p3
+        lf1_p3 = self.fc_id_256_2_1_w(f1_p3) * f1_p3
+        lf2_p3 = self.fc_id_256_2_2_w(f2_p3) * f2_p3
 
 
         predict = torch.cat([lfg_p1, lfg_p2, lfg_p3, lf0_p2, lf1_p2, lf0_p3, lf1_p3, lf2_p3], dim=1)
         g1 = self.fc_g(predict)
-        return predict, fg_p1, fg_p2, fg_p3, l_p1, l_p2, l_p3, l0_p2, l1_p2, l0_p3, l1_p3, l2_p3, g1
+        #predict = torch.cat([lfg_p1, lf0_p2, lf1_p2, lf0_p3, lf1_p3, lf2_p3], dim=1)
+        return predict, lfg_p1, lfg_p2, lfg_p3, l_p1, l_p2, l_p3, l0_p2, l1_p2, l0_p3, l1_p3, l2_p3, g1
