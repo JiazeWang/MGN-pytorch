@@ -175,7 +175,7 @@ class MGN(nn.Module):
         self._init_fc(self.fc_id_256_2_0)
         self._init_fc(self.fc_id_256_2_1)
         self._init_fc(self.fc_id_256_2_2)
-        self._init_fc(self.fc_id_weight)
+        #self._init_fc(self.fc_id_weight)
         self._init_fc(self.fc_g)
 
 
