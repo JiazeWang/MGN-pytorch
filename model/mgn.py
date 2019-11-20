@@ -219,6 +219,17 @@ class MGN(nn.Module):
         z1_p3 = zp3[:, :, 1:2, :]
         z2_p3 = zp3[:, :, 2:3, :]
 
+
+        fg_p1 = self.reduction_0(zg_p1).squeeze(dim=3).squeeze(dim=2)
+        fg_p2 = self.reduction_1(zg_p2).squeeze(dim=3).squeeze(dim=2)
+        fg_p3 = self.reduction_2(zg_p3).squeeze(dim=3).squeeze(dim=2)
+        f0_p2 = self.reduction_3(z0_p2).squeeze(dim=3).squeeze(dim=2)
+        f1_p2 = self.reduction_4(z1_p2).squeeze(dim=3).squeeze(dim=2)
+        f0_p3 = self.reduction_5(z0_p3).squeeze(dim=3).squeeze(dim=2)
+        f1_p3 = self.reduction_6(z1_p3).squeeze(dim=3).squeeze(dim=2)
+        f2_p3 = self.reduction_7(z2_p3).squeeze(dim=3).squeeze(dim=2)
+
+
         fg_p1 = self.fc_id_weight(zg_p1).squeeze(dim=3).squeeze(dim=2)
         fg_p2 = self.fc_id_weight(zg_p2).squeeze(dim=3).squeeze(dim=2)
         fg_p3 = self.fc_id_weight(zg_p3).squeeze(dim=3).squeeze(dim=2)
