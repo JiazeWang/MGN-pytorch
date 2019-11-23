@@ -6,7 +6,7 @@ import torch.nn.functional as F
 import datetime
 from option import args
 from torchvision.models.resnet import resnet50, Bottleneck
-from non_local_2D import Nonlocal
+from model.non_local_2D import Nonlocal
 class ConvBlock(nn.Module):
     """Basic convolutional block:
     convolution + batch normalization + relu.
