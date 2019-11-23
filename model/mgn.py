@@ -106,7 +106,7 @@ class MGN(nn.Module):
     def forward(self, x):
 
         x = self.backone(x)
-        print(x.shape)
+        #print(x.shape)
         p1 = self.p1(x)
         p2 = self.p2(x)
         p3 = self.p3(x)
