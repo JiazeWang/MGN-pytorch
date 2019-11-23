@@ -108,7 +108,7 @@ class MGN(nn.Module):
     def forward(self, x):
 
         x = self.backone(x)
-
+        print("x.shape",x.shape)
         p1 = self.p1(x)
         p2 = self.p2(x)
         p3 = self.p3(x)
@@ -149,3 +149,17 @@ class MGN(nn.Module):
         predict = torch.cat([fg_p1, fg_p2, fg_p3, f0_p2, f1_p2, f0_p3, f1_p3, f2_p3], dim=1)
 
         return predict, fg_p1, fg_p2, fg_p3, l_p1, l_p2, l_p3, l0_p2, l1_p2, l0_p3, l1_p3, l2_p3
+
+if __name__ == "__main__":
+    input_tensor = torch.rand(8, 3, 384, 128)
+    model = MGN(num_classes=100)
+    print(model)
+    starttime = datetime.datetime.now()
+    output = model(input_tensor)
+    endtime = datetime.datetime.now()
+    print(output.size())
+    print((endtime - starttime).seconds)
+    num_params=0
+    for param in model.parameters():
+        num_params += param.reshape((-1, 1)).shape[0]
+    print("Model Size is {:.3f}M".format(num_params/1000000))
