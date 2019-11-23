@@ -20,8 +20,8 @@ class ConvBlock(nn.Module):
     """
     def __init__(self, in_c, out_c, k, s=1, p=0):
         super(ConvBlock, self).__init__()
-        self.conv = nn.Conv1d(in_c, out_c, k, stride=s, padding=p)
-        self.bn = nn.BatchNorm1d(out_c)
+        self.conv = nn.Conv2d(in_c, out_c, k, stride=s, padding=p)
+        self.bn = nn.BatchNorm2d(out_c)
 
     def forward(self, x):
         return F.relu(self.bn(self.conv(x)))
@@ -170,6 +170,16 @@ class MGN(nn.Module):
         z1_p3 = zp3[:, :, 1:2, :]
         z2_p3 = zp3[:, :, 2:3, :]
 
+
+        zg_p1 = self.channel_attention(zg_p1)
+        zg_p2 = self.channel_attention(zg_p2)
+        zg_p3 = self.channel_attention(zg_p3)
+        z0_p2 = self.channel_attention(z0_p2)
+        z1_p2 = self.channel_attention(z1_p2)
+        z0_p3 = self.channel_attention(z0_p3)
+        z1_p3 = self.channel_attention(z1_p3)
+        z2_p3 = self.channel_attention(z2_p3)
+
         fg_p1 = self.reduction_0(zg_p1).squeeze(dim=3).squeeze(dim=2)
         fg_p2 = self.reduction_1(zg_p2).squeeze(dim=3).squeeze(dim=2)
         fg_p3 = self.reduction_2(zg_p3).squeeze(dim=3).squeeze(dim=2)
@@ -179,14 +189,7 @@ class MGN(nn.Module):
         f1_p3 = self.reduction_6(z1_p3).squeeze(dim=3).squeeze(dim=2)
         f2_p3 = self.reduction_7(z2_p3).squeeze(dim=3).squeeze(dim=2)
 
-        fg_p1 = self.channel_attention(fg_p1)
-        fg_p2 = self.channel_attention(fg_p2)
-        fg_p3 = self.channel_attention(fg_p3)
-        f0_p2 = self.channel_attention(f0_p2)
-        f1_p2 = self.channel_attention(f1_p2)
-        f0_p3 = self.channel_attention(f0_p3)
-        f1_p3 = self.channel_attention(f1_p3)
-        f2_p3 = self.channel_attention(f2_p3)
+
 
 
         l_p1 = self.fc_id_2048_0(fg_p1)
