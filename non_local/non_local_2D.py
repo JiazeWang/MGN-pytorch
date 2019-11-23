@@ -164,7 +164,7 @@ class Nonlocal(nn.Module):
         return x_identity + p
 
 if __name__ == "__main__":
-    input_tensor = torch.rand(8, 1024, 8, 7, 7)
+    input_tensor = torch.rand(8, 1024, 7, 7)
     model = Nonlocal(dim = 1024, dim_inner=512)
     print(model)
     starttime = datetime.datetime.now()
