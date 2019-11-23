@@ -12,6 +12,25 @@ from non_local_2D import Nonlocal
 def make_model(args):
     return MGN(args)
 
+class ChannelAttn(nn.Module):
+
+    def __init__(self, in_channels, reduction_rate=16):
+        super(ChannelAttn, self).__init__()
+        assert in_channels%reduction_rate == 0
+        self.conv1 = ConvBlock(in_channels, in_channels // reduction_rate, 1)
+        self.conv2 = ConvBlock(in_channels // reduction_rate, in_channels, 1)
+
+    def forward(self, input):
+        # squeeze operation (global average pooling)
+        x = input
+        #x = F.avg_pool2d(x, x.size()[2:])
+        # excitation operation (2 conv layers)
+        x = self.conv1(x)
+        x = self.conv2(x)
+        #return x*input + input
+        return x * input
+
+
 class MGN(nn.Module):
     def __init__(self, args):
         super(MGN, self).__init__()
@@ -30,6 +49,9 @@ class MGN(nn.Module):
         )
         self.pixel_attention = Nonlocal(dim = 1024, dim_inner=512)
         self.pixel_attention1 = Nonlocal(dim = 2048, dim_inner=512)
+        self.pixel_attention2 = Nonlocal(dim = 2048, dim_inner=512)
+        self.pixel_attention3 = Nonlocal(dim = 2048, dim_inner=512)
+
         res_conv4 = nn.Sequential(*resnet.layer3[1:])
 
         res_g_conv5 = resnet.layer4
@@ -79,7 +101,7 @@ class MGN(nn.Module):
         self.fc_id_256_2_0 = nn.Linear(args.feats, num_classes)
         self.fc_id_256_2_1 = nn.Linear(args.feats, num_classes)
         self.fc_id_256_2_2 = nn.Linear(args.feats, num_classes)
-
+        self.channel_attention = ChannelAttn()
 
         self._init_fc(self.fc_id_2048_0)
         self._init_fc(self.fc_id_2048_1)
@@ -114,9 +136,9 @@ class MGN(nn.Module):
         p1 = self.p1(x)
         p1 = self.pixel_attention1(p1)
         p2 = self.p2(x)
-        p2 = self.pixel_attention1(p2)
+        p2 = self.pixel_attention2(p2)
         p3 = self.p3(x)
-        p3 = self.pixel_attention1(p3)
+        p3 = self.pixel_attention3(p3)
 
         zg_p1 = self.maxpool_zg_p1(p1)
         zg_p2 = self.maxpool_zg_p2(p2)
@@ -139,6 +161,15 @@ class MGN(nn.Module):
         f0_p3 = self.reduction_5(z0_p3).squeeze(dim=3).squeeze(dim=2)
         f1_p3 = self.reduction_6(z1_p3).squeeze(dim=3).squeeze(dim=2)
         f2_p3 = self.reduction_7(z2_p3).squeeze(dim=3).squeeze(dim=2)
+
+        fg_p1 = self.channel_attention(fg_p1)
+        fg_p2 = self.channel_attention(fg_p2)
+        fg_p3 = self.channel_attention(fg_p3)
+        f0_p2 = self.channel_attention(f0_p2)
+        f1_p2 = self.channel_attention(f1_p2)
+        f0_p3 = self.channel_attention(f0_p3)
+        f1_p3 = self.channel_attention(f1_p3)
+        f2_p3 = self.channel_attention(f2_p3)
 
 
         l_p1 = self.fc_id_2048_0(fg_p1)
