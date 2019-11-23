@@ -7,7 +7,24 @@ import datetime
 from option import args
 from torchvision.models.resnet import resnet50, Bottleneck
 from non_local_2D import Nonlocal
+class ConvBlock(nn.Module):
+    """Basic convolutional block:
+    convolution + batch normalization + relu.
 
+    Args (following http://pytorch.org/docs/master/nn.html#torch.nn.Conv2d):
+    - in_c (int): number of input channels.
+    - out_c (int): number of output channels.
+    - k (int or tuple): kernel size.
+    - s (int or tuple): stride.
+    - p (int or tuple): padding.
+    """
+    def __init__(self, in_c, out_c, k, s=1, p=0):
+        super(ConvBlock, self).__init__()
+        self.conv = nn.Conv2d(in_c, out_c, k, stride=s, padding=p)
+        self.bn = nn.BatchNorm2d(out_c)
+
+    def forward(self, x):
+        return F.relu(self.bn(self.conv(x)))
 
 def make_model(args):
     return MGN(args)
