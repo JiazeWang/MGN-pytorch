@@ -110,10 +110,13 @@ class MGN(nn.Module):
 
         x = self.backone(x)
         x = self.pixel_attention(x)
-        
+
         p1 = self.p1(x)
+        p1 = self.pixel_attention(p1)
         p2 = self.p2(x)
+        p2 = self.pixel_attention(p2)
         p3 = self.p3(x)
+        p3 = self.pixel_attention(p3)
 
         zg_p1 = self.maxpool_zg_p1(p1)
         zg_p2 = self.maxpool_zg_p2(p2)
