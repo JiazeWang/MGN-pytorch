@@ -5,6 +5,7 @@ from torch import nn
 import torch.nn.functional as F
 
 from torchvision.models.resnet import resnet50, Bottleneck
+from .non_local_2D import Nonlocal
 
 def make_model(args):
     return MGN(args)
@@ -25,6 +26,7 @@ class MGN(nn.Module):
             resnet.layer2,
             resnet.layer3[0],
         )
+        self.pixel_attention = Nonlocal(dim = 1024, dim_inner=512)
 
         res_conv4 = nn.Sequential(*resnet.layer3[1:])
 
@@ -106,7 +108,7 @@ class MGN(nn.Module):
     def forward(self, x):
 
         x = self.backone(x)
-        print(x.shape)
+
         p1 = self.p1(x)
         p2 = self.p2(x)
         p3 = self.p3(x)
