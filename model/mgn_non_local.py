@@ -15,8 +15,8 @@ def make_model(args):
 class MGN(nn.Module):
     def __init__(self, args):
         super(MGN, self).__init__()
-        #num_classes = args.num_classes
-        num_classes = 100
+        num_classes = args.num_classes
+        #num_classes = 100
         resnet = resnet50(pretrained=True)
 
         self.backone = nn.Sequential(
@@ -153,7 +153,7 @@ class MGN(nn.Module):
 
 if __name__ == "__main__":
     input_tensor = torch.rand(8, 3, 384, 128)
-    model = MGN()
+    model = MGN(args.num_classes = 100, args.pool = 'max',args.feats = 512)
     print(model)
     starttime = datetime.datetime.now()
     output = model(input_tensor)
