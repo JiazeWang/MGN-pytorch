@@ -158,7 +158,7 @@ if __name__ == "__main__":
     starttime = datetime.datetime.now()
     output = model(input_tensor)
     endtime = datetime.datetime.now()
-    print(output.size())
+    print(output[0].size())
     print((endtime - starttime).seconds)
     num_params=0
     for param in model.parameters():
