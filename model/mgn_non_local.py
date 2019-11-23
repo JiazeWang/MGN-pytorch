@@ -4,7 +4,7 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 import datetime
-from ../option import args
+from option import args
 from torchvision.models.resnet import resnet50, Bottleneck
 from non_local_2D import Nonlocal
 
