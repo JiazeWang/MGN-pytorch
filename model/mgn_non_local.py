@@ -29,7 +29,7 @@ class MGN(nn.Module):
             resnet.layer3[0],
         )
         self.pixel_attention = Nonlocal(dim = 1024, dim_inner=512)
-        self.pixel_attention = Nonlocal(dim = 2048, dim_inner=512)
+        self.pixel_attention1 = Nonlocal(dim = 2048, dim_inner=512)
         res_conv4 = nn.Sequential(*resnet.layer3[1:])
 
         res_g_conv5 = resnet.layer4
