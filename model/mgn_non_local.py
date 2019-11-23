@@ -153,7 +153,7 @@ class MGN(nn.Module):
 
 if __name__ == "__main__":
     input_tensor = torch.rand(8, 3, 384, 128)
-    model = MGN()
+    model = MGN(args)
     print(model)
     starttime = datetime.datetime.now()
     output = model(input_tensor)
