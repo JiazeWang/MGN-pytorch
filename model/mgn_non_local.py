@@ -31,7 +31,7 @@ def make_model(args):
 
 class ChannelAttn(nn.Module):
 
-    def __init__(self, in_channels=512, reduction_rate=16):
+    def __init__(self, in_channels=256, reduction_rate=16):
         super(ChannelAttn, self).__init__()
         assert in_channels%reduction_rate == 0
         self.conv1 = ConvBlock(in_channels, in_channels // reduction_rate, 1)
