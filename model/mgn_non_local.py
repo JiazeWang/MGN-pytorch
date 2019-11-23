@@ -3,9 +3,11 @@ import copy
 import torch
 from torch import nn
 import torch.nn.functional as F
+import datetime
 
 from torchvision.models.resnet import resnet50, Bottleneck
-from .non_local_2D import Nonlocal
+from non_local_2D import Nonlocal
+
 
 def make_model(args):
     return MGN(args)
@@ -93,7 +95,6 @@ class MGN(nn.Module):
     def _init_reduction(reduction):
         # conv
         nn.init.kaiming_normal_(reduction[0].weight, mode='fan_in')
-        #nn.init.constant_(reduction[0].bias, 0.)
 
         # bn
         nn.init.normal_(reduction[1].weight, mean=1., std=0.02)
