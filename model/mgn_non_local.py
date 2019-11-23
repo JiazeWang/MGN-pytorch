@@ -4,7 +4,7 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 import datetime
-
+from ../option import args
 from torchvision.models.resnet import resnet50, Bottleneck
 from non_local_2D import Nonlocal
 
@@ -153,7 +153,7 @@ class MGN(nn.Module):
 
 if __name__ == "__main__":
     input_tensor = torch.rand(8, 3, 384, 128)
-    model = MGN(args.num_classes = 100, args.pool = 'max',args.feats = 512)
+    model = MGN()
     print(model)
     starttime = datetime.datetime.now()
     output = model(input_tensor)
