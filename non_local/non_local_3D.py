@@ -5,7 +5,7 @@
 
 import torch
 import torch.nn as nn
-import datatime
+import datetime
 
 
 class Nonlocal(nn.Module):
